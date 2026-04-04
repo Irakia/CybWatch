@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Devices - CybWatch{% endblock %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Devices</h2>
+        <span class="text-gray-400" id="device-count"></span>
+    </div>
+    
+    <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">IP Address</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">MAC Address</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Hostname</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Vendor</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Last Seen</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="devices-table" 
+                   hx-get="/api/devices/list" 
+                   hx-trigger="load, every 30s"
+                   hx-swap="innerHTML">
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-gray-400">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -27,6 +27,16 @@ class Settings(BaseSettings):
     port_scan_threshold: int = 10  # unique ports to trigger alert
     port_scan_window_seconds: int = 60
     high_traffic_threshold_mb: float = 100.0  # mb in 1 hour
+
+
+    # Email settings
+    email_enabled: bool = False
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    email_from: str = ""
+    email_to: str = ""
     
     class Config:
         env_file = ".env"

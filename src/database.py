@@ -232,6 +232,14 @@ class Database:
             (datetime.utcnow().isoformat(), alert_id)
         )
         await self._connection.commit()
+
+    async def acknowledge_all_alerts(self) -> None:
+        """Acknowledge all alerts."""
+        await self._connection.execute(
+            "UPDATE alerts SET acknowledged = 1, acknowledged_at = ? WHERE acknowledged = 0",
+            (datetime.utcnow().isoformat(),)
+        )
+        await self._connection.commit()
     
     # detection rules
     

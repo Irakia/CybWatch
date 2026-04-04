@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CybWatch{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <nav class="w-64 bg-gray-800 min-h-screen p-4 fixed">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-cyan-400">CybWatch</h1>
+                <p class="text-gray-400 text-sm">Network Security Monitor</p>
+            </div>
+            
+            <ul class="space-y-2">
+                <li>
+                    <a href="/" class="block px-4 py-2 rounded hover:bg-gray-700 {% if active_page == 'dashboard' %}bg-gray-700 text-cyan-400{% endif %}">
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="/devices" class="block px-4 py-2 rounded hover:bg-gray-700 {% if active_page == 'devices' %}bg-gray-700 text-cyan-400{% endif %}">
+                        Devices
+                    </a>
+                </li>
+                <li>
+                    <a href="/alerts" class="block px-4 py-2 rounded hover:bg-gray-700 {% if active_page == 'alerts' %}bg-gray-700 text-cyan-400{% endif %}">
+                        Alerts
+                    </a>
+                </li>
+                <li>
+                    <a href="/traffic" class="block px-4 py-2 rounded hover:bg-gray-700 {% if active_page == 'traffic' %}bg-gray-700 text-cyan-400{% endif %}">
+                        Traffic
+                    </a>
+                </li>
+                <li>
+                    <a href="/settings" class="block px-4 py-2 rounded hover:bg-gray-700 {% if active_page == 'settings' %}bg-gray-700 text-cyan-400{% endif %}">
+                        Settings
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="absolute bottom-4 left-4 right-4">
+                <div class="text-xs text-gray-500">
+                    <p>System Status: <span class="text-green-400">● Online</span></p>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main content -->
+        <main class="ml-64 flex-1 p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

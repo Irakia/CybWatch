@@ -7,13 +7,14 @@ A network security monitoring system built on a raspberry pi
 Database 
 Pydantic models 
 Config 
-Parsers: 
-  nmap 
-  zeek
 Sample data 
 This Readme
+Email notifications
+FastAPI and routers 
 
-## TODO 
+Parsers 
+  -nmap 
+  -zeek
 
 Detection 
   -Port scan
@@ -21,13 +22,12 @@ Detection
   -High traffic 
   -New device 
 
-FastAPI and routers 
-
-Email notifications
-
 Web templates 
   -Dashboard 
   -Devices 
   -Alerts
   -Traffic
   -Settings
+
+## TODO 
+

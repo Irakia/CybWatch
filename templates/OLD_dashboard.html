@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>CybWatch a Network Security HQ</title>
+    <style>
+        body {
+            background-color: #00CDCD;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            color: #000080;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #FF0000;
+            text-shadow: 2px 2px #FFFF00;
+            font-size: 2.5em;
+        }
+        
+        .container {
+            background-color: #FFFFFF;
+            border: 4px solid #000080;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 5px 5px #808080;
+        }
+        
+        .stats-table {
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        
+        .stats-table td {
+            border: 3px solid #000080;
+            padding: 15px 30px;
+            background-color: #FFFFCC;
+            font-size: 1.2em;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #FF00FF;
+        }
+        
+        .construction {
+            margin: 20px;
+        }
+        
+        marquee {
+            color: #FF0000;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .status-online {
+            color: #00AA00;
+            font-weight: bold;
+        }
+        
+        hr {
+            border: 2px dashed #000080;
+            width: 80%;
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .stars {
+            color: #FFD700;
+        }
+
+        .scroll-container {
+            overflow: hidden;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .scroll-text {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scroll 15s linear infinite;
+            color: #FF0000;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+    </style>
+</head>
+<body>
+    <h1> CybWatch </h1>
+    <p><i> Your Network Security Headquarters </i></p>
+    
+    <hr>
+    
+    <div class="container">
+        <h2> System Status </h2>
+        
+        <table class="stats-table">
+            <tr>
+                <td>Devices on Network</td>
+                <td class="stat-value" id="device-count">...</td>
+            </tr>
+            <tr>
+                <td>Total Alerts</td>
+                <td class="stat-value" id="alert-count">...</td>
+            </tr>
+            <tr>
+                <td>Unacknowledged</td>
+                <td class="stat-value" id="unack-count">...</td>
+            </tr>
+        </table>
+    </div>
+    
+    <hr>
+    
+    <div class="construction">
+        <img src="/static/images/construction.gif" 
+             alt="Under Construction"
+             width="100">
+        <p><span class="blink">🚧</span> TBD <span class="blink">🚧</span></p>
+    </div>
+    
+<div class="scroll-container">
+        <span class="scroll-text">
+            <span class="stars">★ ★ ★</span> 
+            Welcome to CybWatch!!!
+            <span class="stars">★ ★ ★</span>
+        </span>
+    </div>
+    
+    <script>
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/dashboard/stats');
+                const data = await response.json();
+                document.getElementById('device-count').textContent = data.device_count;
+                document.getElementById('alert-count').textContent = data.alert_count;
+                document.getElementById('unack-count').textContent = data.unacknowledged_count;
+            } catch (e) {
+                console.error('Failed to load stats:', e);
+            }
+        }
+        
+        loadStats();
+        setInterval(loadStats, 10000);
+    </script>
+</body>
+</html>

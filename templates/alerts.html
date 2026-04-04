@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Alerts - CybWatch{% endblock %}
+
+{% block content %}
+<div>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Alerts</h2>
+        <button onclick="acknowledgeAll()" 
+                class="bg-cyan-600 hover:bg-cyan-700 px-4 py-2 rounded text-sm">
+            Acknowledge All
+        </button>
+    </div>
+    
+    <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Severity</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Rule</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Description</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Source IP</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Time</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Status</th>
+                    <th class="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="alerts-table" 
+                   hx-get="/api/alerts/list" 
+                   hx-trigger="load, every 10s"
+                   hx-swap="innerHTML">
+                <tr>
+                    <td colspan="7" class="px-6 py-4 text-gray-400">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+async function acknowledgeAlert(id) {
+    await fetch(`/api/alerts/${id}/acknowledge`, { method: 'POST' });
+    htmx.trigger('#alerts-table', 'load');
+}
+
+async function acknowledgeAll() {
+    await fetch('/api/alerts/acknowledge-all', { method: 'POST' });
+    htmx.trigger('#alerts-table', 'load');
+}
+</script>
+{% endblock %}
