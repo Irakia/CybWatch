@@ -10,7 +10,7 @@ from ..database import Database, get_db
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
 
 
-@router.get("/stats")
+@router.get("/stats", response_class=HTMLResponse)
 async def get_stats(db: Database = Depends(get_db)):
     """Get dashboard stats"""
     devices = await db.get_devices()
