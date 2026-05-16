@@ -16,6 +16,29 @@
         </div>
     </div>
     
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Connections Chart -->
+        <div class="bg-gray-800 rounded-lg border border-gray-700">
+            <div class="p-4 border-b border-gray-700">
+                <h3 class="text-xl font-semibold">Connections (Last 24h)</h3>
+            </div>
+            <div class="p-4">
+                <canvas id="connectionsChart" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Alerts Chart -->
+        <div class="bg-gray-800 rounded-lg border border-gray-700">
+            <div class="p-4 border-b border-gray-700">
+                <h3 class="text-xl font-semibold">Alerts by Type</h3>
+            </div>
+            <div class="p-4">
+                <canvas id="alertsChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- recent alerts -->
         <div class="bg-gray-800 rounded-lg border border-gray-700">
@@ -44,4 +67,85 @@
         </div>
     </div>
 </div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Chart.js dark theme defaults
+Chart.defaults.color = '#9CA3AF';
+Chart.defaults.borderColor = '#374151';
+
+// Load and render charts
+async function loadCharts() {
+    // Connections chart
+    try {
+        const connResp = await fetch('/api/dashboard/chart/connections');
+        const connData = await connResp.json();
+        
+        const connCtx = document.getElementById('connectionsChart');
+        if (connCtx) {
+            new Chart(connCtx, {
+                type: 'line',
+                data: {
+                    labels: connData.labels,
+                    datasets: [{
+                        label: 'Connections',
+                        data: connData.values,
+                        borderColor: '#22D3EE',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#22D3EE',
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#374151' } },
+                        x: { grid: { color: '#374151' } }
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        console.log('Could not load connections chart:', e);
+    }
+    
+    // Alerts chart
+    try {
+        const alertResp = await fetch('/api/dashboard/chart/alerts');
+        const alertData = await alertResp.json();
+        
+        const alertCtx = document.getElementById('alertsChart');
+        if (alertCtx && alertData.labels.length > 0) {
+            new Chart(alertCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: alertData.labels,
+                    datasets: [{
+                        data: alertData.values,
+                        backgroundColor: ['#F97316', '#FACC15', '#EF4444', '#22D3EE', '#34D399'],
+                        borderColor: '#1F2937',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { padding: 15 } }
+                    }
+                }
+            });
+        } else if (alertCtx) {
+            alertCtx.parentElement.innerHTML = '<p class="text-gray-400 text-center py-8">No alerts yet</p>';
+        }
+    } catch (e) {
+        console.log('Could not load alerts chart:', e);
+    }
+}
+
+// Load charts on page load
+document.addEventListener('DOMContentLoaded', loadCharts);
+</script>
 {% endblock %}

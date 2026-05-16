@@ -2,7 +2,7 @@
 Traffic API Router
 """
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import HTMLResponse
 from ..database import Database, get_db
 
@@ -10,12 +10,20 @@ router = APIRouter(prefix="/api/traffic", tags=["traffic"])
 
 
 @router.get("/list", response_class=HTMLResponse)
-async def get_traffic_list(db: Database = Depends(get_db)):
-    """get connections in tablerows"""
-    connections = await db.get_connections(limit=50)
+async def get_traffic_list(
+    search: str = Query(None, description="Search IP or service"),
+    protocol: str = Query(None, description="Filter by protocol"),
+    db: Database = Depends(get_db)
+):
+    """Get connections with optional filtering."""
+    connections = await db.get_connections_filtered(
+        search=search,
+        protocol=protocol,
+        limit=50
+    )
     
     if not connections:
-        return '<tr><td colspan="7" class="px-6 py-4 text-gray-400">No connections recorded</td></tr>'
+        return '<tr><td colspan="7" class="px-6 py-4 text-gray-400">No connections found</td></tr>'
     
     html = ""
     for c in connections:

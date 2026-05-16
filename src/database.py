@@ -103,6 +103,13 @@ DEFAULT_RULES = [
         "severity": "high",
         "rule_type": "port_match",
         "config": '{"ports": [22, 23, 3389, 445, 135, 139]}'
+    },
+    {
+        "name": "malicious_ip_connection",
+        "description": "Alert on connections to known malicious IPs",
+        "severity": "critical",
+        "rule_type": "threat_intel",
+        "config": '{}'
     }
 ]
 
@@ -252,6 +259,74 @@ class Database:
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
     
+    async def toggle_rule(self, rule_id: int) -> bool:
+        """Toggle a detection rule on/off. Returns new state."""
+        cursor = await self._connection.execute(
+            "SELECT enabled FROM detection_rules WHERE id = ?", (rule_id,)
+        )
+        row = await cursor.fetchone()
+        if not row:
+            return False
+        
+        new_state = not row[0]
+        await self._connection.execute(
+            "UPDATE detection_rules SET enabled = ? WHERE id = ?",
+            (new_state, rule_id)
+        )
+        await self._connection.commit()
+        return new_state
+    
+    # filtered connections
+    
+    async def get_connections_filtered(self, search: str = None, protocol: str = None,
+                                       limit: int = 100) -> List[Dict[str, Any]]:
+        """Get connections with optional filters."""
+        query = "SELECT * FROM connections WHERE 1=1"
+        params = []
+        
+        if search:
+            query += " AND (src_ip LIKE ? OR dst_ip LIKE ? OR service LIKE ?)"
+            search_param = f"%{search}%"
+            params.extend([search_param, search_param, search_param])
+        
+        if protocol:
+            query += " AND protocol = ?"
+            params.append(protocol.lower())
+        
+        query += " ORDER BY timestamp DESC LIMIT ?"
+        params.append(limit)
+        
+        cursor = await self._connection.execute(query, params)
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+    
+    # chart data
+    
+    async def get_connections_by_hour(self, hours: int = 24) -> List[Dict[str, Any]]:
+        """Get connection counts grouped by hour for charts."""
+        cursor = await self._connection.execute("""
+            SELECT 
+                strftime('%Y-%m-%d %H:00', timestamp) as hour,
+                COUNT(*) as count
+            FROM connections
+            WHERE timestamp >= datetime('now', ?)
+            GROUP BY hour
+            ORDER BY hour ASC
+        """, (f'-{hours} hours',))
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+    
+    async def get_alerts_by_rule(self) -> List[Dict[str, Any]]:
+        """Get alert counts grouped by rule name for charts."""
+        cursor = await self._connection.execute("""
+            SELECT rule_name, COUNT(*) as count
+            FROM alerts
+            GROUP BY rule_name
+            ORDER BY count DESC
+        """)
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+    
     # scans
     
     async def record_scan(self, scan_type: str, targets: str,
@@ -264,7 +339,14 @@ class Database:
         )
         await self._connection.commit()
         return cursor.lastrowid
-
+    
+    async def get_last_scan(self) -> Optional[Dict[str, Any]]:
+        """Get the most recent scan."""
+        cursor = await self._connection.execute(
+            "SELECT * FROM scans ORDER BY timestamp DESC LIMIT 1"
+        )
+        row = await cursor.fetchone()
+        return dict(row) if row else None
 
 
 db = Database()

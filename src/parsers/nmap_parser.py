@@ -5,15 +5,66 @@ Parses nmap XML output to extract devices
 """
 
 import xml.etree.ElementTree as ET
+import subprocess
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
 
 class NmapParser:
-    """Parser for Nmap XML output."""
+    """Parser for Nmap XML output and scanning."""
+    
+    def scan_network(self, target: str) -> List[Dict[str, Any]]:
+        """
+        Run Nmap scan and return discovered hosts.
+        
+        Args:
+            target: Network to scan (e.g., "10.0.0.0/24")
+        
+        Returns:
+            List of host dicts with ip, mac, hostname, vendor
+        """
+        try:
+            # Run nmap with XML output
+            result = subprocess.run(
+                ["nmap", "-sn", "-oX", "-", target],
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minute timeout
+            )
+            
+            if result.returncode != 0:
+                print(f"[NmapParser] Nmap error: {result.stderr}")
+                return []
+            
+            # Parse XML output
+            scan_data = self.parse_xml_string(result.stdout)
+            
+            # Convert to simple host list
+            hosts = []
+            for host in scan_data.get("hosts", []):
+                hosts.append({
+                    "ip": host.get("ip_address"),
+                    "mac": host.get("mac_address"),
+                    "hostname": host.get("hostname"),
+                    "vendor": host.get("vendor"),
+                })
+            
+            return hosts
+        
+        except subprocess.TimeoutExpired:
+            print("[NmapParser] Nmap scan timed out")
+            return []
+        except FileNotFoundError:
+            print("[NmapParser] Nmap not installed")
+            return []
+        except Exception as e:
+            print(f"[NmapParser] Error: {e}")
+            return []
     
     def parse_xml_file(self, filepath: Path) -> Dict[str, Any]:
         """Parse Nmap XML file."""
+        if isinstance(filepath, str):
+            filepath = Path(filepath)
         if not filepath.exists():
             return {"hosts": []}
         

@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     
     # Nmap Config
     nmap_target_network: str = "10.0.0.0/24"
+    nmap_scan_interval_minutes: int = 60  # Run Nmap scan every hour
+    nmap_scan_enabled: bool = True
     
     # Detection thresholds
     port_scan_threshold: int = 10  # unique ports to trigger alert

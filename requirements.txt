@@ -1,0 +1,16 @@
+# Cybwatch dependencies (Python 3.11)
+
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+jinja2==3.1.4
+
+# Config + models
+pydantic==2.10.3
+pydantic-settings==2.7.0
+
+# Async SQLite
+aiosqlite==0.20.0
+
+# Tests
+pytest==8.3.4

@@ -66,6 +66,7 @@ User=$USER
 WorkingDirectory=$INSTALL_DIR
 Environment="PATH=$INSTALL_DIR/venv/bin"
 ExecStart=$INSTALL_DIR/venv/bin/python -m src.worker
+AmbientCapabilities=CAP_NET_RAW CAP_NET_ADMIN
 Restart=always
 RestartSec=5
 

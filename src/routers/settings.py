@@ -65,9 +65,19 @@ async def get_rules_settings(db: Database = Depends(get_db)):
     
     html = '<div class="space-y-3">'
     for r in rules:
-        status_color = "text-green-400" if r.get("enabled") else "text-gray-400"
-        status_text = "Active" if r.get("enabled") else "Disabled"
+        enabled = r.get("enabled")
+        status_color = "text-green-400" if enabled else "text-gray-400"
+        status_text = "Active" if enabled else "Disabled"
         severity = r.get("severity", "medium").upper()
+        rule_id = r.get("id")
+        
+        # Toggle button
+        if enabled:
+            btn_class = "bg-green-600 hover:bg-green-700"
+            btn_text = "Enabled"
+        else:
+            btn_class = "bg-gray-600 hover:bg-gray-500"
+            btn_text = "Disabled"
         
         html += f'''
         <div class="flex justify-between items-center py-2 border-b border-gray-700">
@@ -75,11 +85,24 @@ async def get_rules_settings(db: Database = Depends(get_db)):
                 <span class="font-medium">{r.get("name", "Unknown")}</span>
                 <span class="text-gray-400 text-sm ml-2">({severity})</span>
             </div>
-            <span class="{status_color}">● {status_text}</span>
+            <button hx-post="/api/settings/rules/{rule_id}/toggle"
+                    hx-target="#rules-container"
+                    hx-swap="innerHTML"
+                    class="{btn_class} px-3 py-1 rounded text-sm">
+                {btn_text}
+            </button>
         </div>
         '''
     html += '</div>'
     return html
+
+
+@router.post("/rules/{rule_id}/toggle", response_class=HTMLResponse)
+async def toggle_rule(rule_id: int, db: Database = Depends(get_db)):
+    """Toggle a detection rule on/off."""
+    await db.toggle_rule(rule_id)
+    # Return updated rules list
+    return await get_rules_settings(db)
 
 
 @router.get("/system", response_class=HTMLResponse)

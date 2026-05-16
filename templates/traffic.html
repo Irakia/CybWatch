@@ -6,7 +6,39 @@
 <div>
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-3xl font-bold">Traffic</h2>
-        <span class="text-gray-400" id="connection-count"></span>
+    </div>
+    
+    <!-- Search/Filter Bar -->
+    <div class="bg-gray-800 rounded-lg border border-gray-700 p-4 mb-6">
+        <div class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-48">
+                <label class="block text-sm text-gray-400 mb-1">Search IP or Service</label>
+                <input type="text" 
+                       id="search-input"
+                       name="search"
+                       placeholder="e.g. 10.0.0.5 or dns"
+                       class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-cyan-400">
+            </div>
+            <div class="w-40">
+                <label class="block text-sm text-gray-400 mb-1">Protocol</label>
+                <select id="protocol-select"
+                        name="protocol"
+                        class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:border-cyan-400">
+                    <option value="">All</option>
+                    <option value="tcp">TCP</option>
+                    <option value="udp">UDP</option>
+                    <option value="icmp">ICMP</option>
+                </select>
+            </div>
+            <button onclick="applyFilters()"
+                    class="bg-cyan-600 hover:bg-cyan-700 px-4 py-2 rounded text-sm font-medium">
+                Search
+            </button>
+            <button onclick="clearFilters()"
+                    class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-sm font-medium">
+                Clear
+            </button>
+        </div>
     </div>
     
     <div class="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -25,6 +57,7 @@
             <tbody id="traffic-table" 
                    hx-get="/api/traffic/list" 
                    hx-trigger="load, every 10s"
+                   hx-include="#search-input, #protocol-select"
                    hx-swap="innerHTML">
                 <tr>
                     <td colspan="7" class="px-6 py-4 text-gray-400">Loading...</td>
@@ -33,4 +66,30 @@
         </table>
     </div>
 </div>
+
+<script>
+function applyFilters() {
+    const search = document.getElementById('search-input').value;
+    const protocol = document.getElementById('protocol-select').value;
+    
+    let url = '/api/traffic/list?';
+    const params = [];
+    if (search) params.push('search=' + encodeURIComponent(search));
+    if (protocol) params.push('protocol=' + encodeURIComponent(protocol));
+    url += params.join('&');
+    
+    htmx.ajax('GET', url, {target: '#traffic-table', swap: 'innerHTML'});
+}
+
+function clearFilters() {
+    document.getElementById('search-input').value = '';
+    document.getElementById('protocol-select').value = '';
+    htmx.ajax('GET', '/api/traffic/list', {target: '#traffic-table', swap: 'innerHTML'});
+}
+
+// Allow Enter key to trigger search
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') applyFilters();
+});
+</script>
 {% endblock %}
