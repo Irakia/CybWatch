@@ -73,7 +73,17 @@ async def get_alerts_list(db: Database = Depends(get_db)):
         bg = severity_bg(a.get("severity", ""))
         status_color = "text-green-400" if a.get("acknowledged") else "text-yellow-400"
         status_text = "Acknowledged" if a.get("acknowledged") else "Open"
-        
+
+        if a.get("acknowledged"):
+            ack_button = ""
+        else:
+            alert_id = a.get("id")
+            ack_button = (
+                f'<button onclick="acknowledgeAlert({alert_id})" '
+                f'class="text-cyan-400 hover:text-cyan-300 text-sm">'
+                f'Acknowledge</button>'
+            )
+
         html += f'''
         <tr class="border-b border-gray-700 hover:bg-gray-750">
             <td class="px-6 py-4">
@@ -86,15 +96,7 @@ async def get_alerts_list(db: Database = Depends(get_db)):
             <td class="px-6 py-4">{a.get("source_ip", "-")}</td>
             <td class="px-6 py-4 text-sm text-gray-400">{a.get("timestamp", "-")}</td>
             <td class="px-6 py-4"><span class="{status_color}">● {status_text}</span></td>
-            <td class="px-6 py-4">
-                {"" if a.get("acknowledged") else f'''
-                <button 
-                    onclick="acknowledgeAlert({a.get("id")})"
-                    class="text-cyan-400 hover:text-cyan-300 text-sm">
-                    Acknowledge
-                </button>
-                '''}
-            </td>
+            <td class="px-6 py-4">{ack_button}</td>
         </tr>
         '''
     return html
